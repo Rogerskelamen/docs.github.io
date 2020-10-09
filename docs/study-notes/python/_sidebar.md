@@ -2,4 +2,6 @@
 * [python语法(一)](/study-notes/python/python_1)
 * [python语法(二)](/study-notes/python/python_2)
 * [python语法(三)](/study-notes/python/python_3)
+* [python装饰器](/study-notes/python/deco)
+* [爬虫初体验](/study-notes/python/spider)
 * [上一级](/study-notes/)
