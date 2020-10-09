@@ -4,4 +4,5 @@
 * [Linux笔记](/study-notes/linux/)
 * [Odoo学习](/study-notes/odoo/)
 * [Scss学习](/study-notes/scss/)
+* [汇编学习](/study-notes/asm/)
 * [上一级](/)
