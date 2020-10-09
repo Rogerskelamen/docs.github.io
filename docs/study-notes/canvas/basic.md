@@ -1,0 +1,615 @@
+# Canvas的建立（入门）
+
+**首先，`<canvas></canvas>`这玩意是有结束标签的，然后你得知道它有一个==default的宽高：width：300px; height: 150px;==**
+
+> 可以直接用properties中的width和height来更改画布的大小，即：
+
+```html
+<canvas id="tutorial" width="150" height="150"></canvas>
+```
+
+*<u>通常情况下，我们习惯于在`<canvas>`上加上id属性</u>*
+
+> `<canvas>`元素可以像任何一个普通的图像一样（有margin，border，background等等属性）被设计。然而，这些样式不会影响在canvas中的实际图像。
+
+**建议用properties来定义canvas的大小：绘制时图像会伸缩以适应它的框架尺寸，如果CSS的尺寸与初始画布的比例不一致，它会出现扭曲。**
+
+
+
+# 渲染上下文（The rendering context）
+
+*别问上下文是神马，往后看就知道了。。*
+
+## 获取上下文
+
+```js
+var canvas = document.getElementById('tutorial');
+var ctx = canvas.getContext('2d');
+```
+
+​		***很多canvas的功能实现都是跟js有关的***
+
+> `getContext()`只有一个参数，上下文的格式。对于2D图像而言，如本教程，你可以使用 [`CanvasRenderingContext2D`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D)。(反正现在用2d就对了)
+
+## 检查支持性
+
+替换内容是用于在不支持 [`<canvas>`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/canvas) 标签的浏览器中展示的。通过简单的测试`getContext()方法的存在，脚本可以检查编程支持性`。上面的代码片段现在变成了这个样子：
+
+```js
+var canvas = document.getElementById('tutorial');
+
+if (canvas.getContext){
+  var ctx = canvas.getContext('2d');
+  // drawing code here
+} else {
+  // canvas-unsupported code here
+}
+```
+
+
+
+# 绘制图形
+
+## 前置知识：栅格（The Grid）
+
+> 在我们开始画图之前，我们需要了解一下画布栅格（canvas grid）以及坐标空间。
+
+如下图所示，canvas元素默认被网格所覆盖。通常来说网格中的一个单元相当于canvas元素中的一像素。栅格的起点为左上角（坐标为（0,0））。所有元素的位置都相对于原点定位。所以图中蓝色方形左上角的坐标为距离左边（X轴）x像素，距离上边（Y轴）y像素（坐标为（x,y））。
+
+![img](https://mdn.mozillademos.org/files/224/Canvas_default_grid.png)
+
+*嗯，这不就是定位里面的基本知识么。。*
+
+## 绘制矩形
+
+不同于 [SVG](https://developer.mozilla.org/zh-CN/docs/Glossary/SVG)，[`<canvas>`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/canvas) ==只支持两种形式的图形绘制==：<u>矩形和路径（由一系列点连成的线段）。</u>*（SVG就是一种矢量图）*
+
+> 然而，我们拥有众多路径生成的方法让复杂图形的绘制成为了可能。（路径生众生）
+
+**三种方法绘制矩形：**
+
+- [`fillRect(x, y, width, height)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/fillRect)
+
+  绘制一个填充的矩形
+
+- [`strokeRect(x, y, width, height)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/strokeRect)
+
+  绘制一个矩形的边框
+
+- [`clearRect(x, y, width, height)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/clearRect)
+
+  清除指定矩形区域，让清除部分完全透明
+
+其中，***x与y指定了在canvas画布上所绘制的矩形的左上角（相对于原点）的坐标。width和height设置矩形的尺寸。***
+
+注：**反正记住，前两个参数是栅格里的定位点，它决定了图形绘制的起点在哪里**
+
+## 绘制路径
+
+> 之前的矩形绘制，其绘制之后会马上显现在canvas上，即时生效。但是这个不同。
+
+> 图形的基本元素是路径。路径是通过不同颜色和宽度的线段或曲线相连形成的不同形状的点的集合。一个路径，甚至一个子路径，都是闭合的。
+
+**四部曲：**
+
+1. 首先，你需要创建路径起始点。-----------------------------------设起点
+2. 然后你使用[画图命令](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D#Paths)去画出路径。---------------------------------画路径
+3. 之后你把路径封闭。-----------------------------------------------封路径
+4. 一旦路径生成，你就能通过描边或填充路径区域来渲染图形。-----填图形
+
+*可能用到的函数：*
+
+- `beginPath()`
+
+  新建一条路径，生成之后，图形绘制命令被指向到路径上生成路径。
+
+- `closePath()`
+
+  闭合路径之后图形绘制命令又重新指向到上下文中。
+
+  **此函数不是必需的。**这个方法会通过绘制一条从当前点到开始点的直线来闭合图形。如果图形是已经闭合了的，即当前点为开始点，该函数什么也不做。
+
+- `stroke()`
+
+  通过线条来绘制图形轮廓。
+
+- `fill()`
+
+  通过填充路径的内容区域生成实心的图形。
+
+  **当你调用fill()函数时，所有没有闭合的形状都会自动闭合，**所以你不需要调用closePath()函数。但是调用stroke()时不会自动闭合。
+
+## 绘制一个三角形
+
+**直接上代码：**
+
+```js
+var canvas = document.getElementById('canvas');
+if (canvas.getContext) {
+    var ctx = canvas.getContext('2d');
+
+    ctx.beginPath();
+    ctx.moveTo(75, 50);
+    ctx.lineTo(100, 75);
+    ctx.lineTo(100, 25);
+    ctx.fill();
+}
+```
+
+看上去会像这样：
+
+![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAB20lEQVR4Xu3cwWrCUBRF0fjl9dOLQgWptiZ5L9mD5Vw43OWOE/GyeKUucEmtMWYBEvsQAAESu0BsjkKAxC4Qm6MQILELxOYoBEjsArE5CgESu0BsjkKAxC4Qm6MQILELxOYoBEjsArE5CgESu0BsjkKAxC4Qm6MQILELxOYopAVyBdIBuS7L8gWkAXLHuE0Bcj7IAwNIDAPIuSBPZfxM8cg6B+UlhkJiGECOB3lbhkdWEEMhx6H8W4ZCghgKmY/ycRkKCWIoZB7K6jIUEsRQyHiUzWUoJIihkHEou8tQSBBDIftRhpWhkCCGQrajDC9DIUEMhaxHmVaGQtZj3N4BZNvdpr5rKoofOWyzm4YCZBvItMcXkO0gU1CA7AMZjgJkP8hQFCBjQIahABkHMgQFyFiQ3ShAxoPsQgEyB2QzCpB5IJtQgMwFWY0CZD7IKhQgx4B8jALkOJCPUIAcC/IvCpDjQf5EAXIOyFsUIOeBvEQBci7ILxQg54M8oQBpgDxQgHRA7ihAWiD+LyvmAQRI7QKxPb5DgMQuEJujECCxC8TmKARI7AKxOQoBErtAbI5CgMQuEJujECCxC8TmKARI7AKxOQoBErtAbI5CgMQuEJujECCxC8TmKCQG8g1TFDE1QNqXOwAAAABJRU5ErkJggg==)
+
+
+
+### <font face="黑体" color="gray">移动笔触</font>
+
+> 刚才看到的`moveTo()`函数就是涉及到移动笔触的功能，你可以想象一下在纸上作业，一支钢笔或者铅笔的笔尖从一个点到另一个点的移动过程。所以移动笔触就是将开始（0，0）处的笔尖移动到了另一点。
+
+`moveTo(x, y)`
+将笔触移动到指定的坐标x以及y上
+
+
+
+### <font face="黑体" color="gray">线</font>
+
+> 绘制直线，需要用到的方法`lineTo()`。
+
+[`lineTo(x, y)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineTo)
+绘制一条从当前位置到指定x以及y位置的直线。
+
+**该方法有两个参数：x以及y ，代表坐标系中直线结束的点。开始点也可以通过`moveTo()`函数改变。**
+
+画个描边三角形：
+
+```js
+ctx.beginPath();
+ctx.moveTo(125, 125);
+ctx.lineTo(125, 45);
+ctx.lineTo(45, 125);
+ctx.closePath();
+ctx.stroke();
+```
+
+> 如果没有添加闭合路径`closePath()`到描述三角形函数中，则只绘制了两条线段，并不是一个完整的三角形。
+
+
+
+### <font face="黑体" color="gray">圆弧</font>
+
+> 绘制圆弧或者圆，我们使用`arc()`方法。当然可以使用`arcTo()`，不过这个的实现并不是那么的可靠，所以我们这里不作介绍。
+
+- [`arc(x, y, radius, startAngle, endAngle, anticlockwise)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/arc)
+  画一个以（x,y）为圆心的以radius为半径的圆弧（圆），从startAngle开始到endAngle结束，按照anticlockwise给定的方向（默认为顺时针）来生成。
+- [`arcTo(x1, y1, x2, y2, radius)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/arcTo)
+  根据给定的控制点和半径画一段圆弧，再以直线连接两个控制点。
+
+详细说一下arc方法：
+
+`x,y`为绘制圆弧所在圆上的圆心坐标。`radius`为半径。`startAngle`以及`endAngle`参数用弧度定义了开始以及结束的弧度。**这些都是以x轴为基准。**参数`anticlockwise`为一个布尔值。为true时，是逆时针方向，否则顺时针方向。
+
+<font color="brown">注意：`arc()`函数中表示角的单位是弧度，不是角度。角度与弧度的js表达式: 弧度=(Math.PI/180)\*角度。</font>
+
+
+
+### <font face="黑体" color="gray">二次贝塞尔曲线及三次贝塞尔曲线</font>
+
+> 二次及三次[贝塞尔曲线](https://zh.wikipedia.org/wiki/貝茲曲線)都十分有用，一般用来绘制复杂有规律的图形。
+>
+> 我在学什么？前端编程 or 几何学？
+
+- `quadraticCurveTo(cp1x, cp1y, x, y)`
+
+  绘制二次贝塞尔曲线，`cp1x,cp1y`为一个控制点，`x,y为`结束点。
+
+- `bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)`
+
+  绘制三次贝塞尔曲线，`cp1x,cp1y`为控制点一，`cp2x,cp2y`为控制点二，x,y为结束点。
+
+下边的图能够很好的描述两者的关系，二次贝塞尔曲线有一个开始点（蓝色）、一个结束点（蓝色）以及一个控制点（红色），而三次贝塞尔曲线有两个控制点。
+
+参数x、y在这两个方法中都是结束点坐标。`cp1x,cp1y`为坐标中的第一个控制点，`cp2x,cp2y`为坐标中的第二个控制点。
+![img](https://mdn.mozillademos.org/files/223/Canvas_curves.png)
+
+用代码举个栗子吧：
+		先是二次贝塞尔曲线：
+
+```js
+ctx.beginPath();
+ctx.moveTo(75, 25);
+ctx.quadraticCurveTo(25, 25, 25, 62.5);
+ctx.quadraticCurveTo(25, 100, 50, 100);
+ctx.quadraticCurveTo(50, 120, 30, 125);
+ctx.quadraticCurveTo(60, 120, 65, 100);
+ctx.quadraticCurveTo(125, 100, 125, 62.5);
+ctx.quadraticCurveTo(125, 25, 75, 25);
+ctx.stroke();
+```
+
+![img](data:image/png;base64,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)
+
+​		再是三次的：
+
+```js
+ctx.beginPath();
+ctx.moveTo(75, 40);
+ctx.bezierCurveTo(75, 37, 70, 25, 50, 25);
+ctx.bezierCurveTo(20, 25, 20, 62.5, 20, 62.5);
+ctx.bezierCurveTo(20, 80, 40, 102, 75, 120);
+ctx.bezierCurveTo(110, 102, 130, 80, 130, 62.5);
+ctx.bezierCurveTo(130, 62.5, 130, 25, 100, 25);
+ctx.bezierCurveTo(85, 25, 75, 37, 75, 40);
+ctx.fill();
+```
+
+![img](data:image/png;base64,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)
+
+### <font face="黑体" color="gray">矩形</font>
+
+> 正如我们开始所见的[绘制矩形](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes#绘制矩形)，同样，也有rect()方法，将一个矩形路径增加到当前路径上。
+
+`rect(x, y, width, height)`
+绘制一个左上角坐标为（x,y），宽高为width以及height的矩形。
+
+*当该方法执行的时候，moveTo()方法自动设置坐标参数（0,0）。也就是说，当前笔触自动重置回默认坐标。*
+
+
+
+# Path2D 对象
+
+> 为了简化代码和提高性能，[`Path2D`](https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D)对象已可以在较新版本的浏览器中使用，<u>用来缓存或记录绘画命令</u>，这样你将能快速地回顾路径。
+
+<font size=5>But How?</font>
+
+[`Path2D()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D/Path2D)
+`Path2D()`会返回一个新初始化的Path2D对象（可能将某一个路径作为变量——创建一个它的副本，或者将一个包含SVG path数据的字符串作为变量）。
+
+```js
+new Path2D();     // 空的Path对象
+new Path2D(path); // 克隆Path对象
+new Path2D(d);    // 从SVG建立Path对象
+```
+
+*所有的路径方法比如`moveTo`, `rect`, `arc`或`quadraticCurveTo`等，如我们前面见过的，都可以在Path2D中使用。*
+
+> Path2D API 添加了 `addPath`作为将`path`结合起来的方法。当你想要从几个元素中来创建对象时，这将会很实用。比如：
+
+[Path2D.addPath(path [, transform])](https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D/addPath)
+添加了一条路径到当前路径（可能添加了一个变换矩阵）
+
+## Path2D示例
+
+```js
+function draw() {
+  var canvas = document.getElementById('canvas');
+  if (canvas.getContext){
+    var ctx = canvas.getContext('2d');
+
+    var rectangle = new Path2D();	//存入矩形
+    rectangle.rect(10, 10, 50, 50);
+
+    var circle = new Path2D();	//存入圆形
+    circle.moveTo(125, 35);
+    circle.arc(100, 35, 25, 0, 2 * Math.PI);
+
+    ctx.stroke(rectangle);
+    ctx.fill(circle);
+  }
+}
+```
+
+在这个例子中，**我们创造了一个矩形和一个圆。它们都被存为Path2D对象，后面再派上用场。**
+**在这里，带路径参数的`stroke`和`fill`可以把对象画在画布上。**
+
+## 使用 SVG paths
+
+> 新的Path2D API有另一个强大的特点，就是使用SVG path data来初始化canvas上的路径。这将使你获取路径时可以以SVG或canvas的方式来重用它们。
+
+了解了解就好。。
+
+
+
+# 色彩（Colors）
+
+> 到目前为止，我们只看到过绘制内容的方法。如果我们想要给图形上色，有两个重要的属性可以做到：`fillStyle` 和 `strokeStyle。`
+
+- [`fillStyle = color`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/fillStyle)
+
+  设置图形的填充颜色。
+
+- [`strokeStyle = color`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/strokeStyle)
+
+  设置图形轮廓的颜色。
+
+`color` 可以是表示 CSS 颜色值的字符串，**渐变对象**或者**图案对象。**
+默认情况下，线条和填充颜色都是黑色（CSS 颜色值 `#000000`）。
+
+<font color="brown">**注意:** 一旦您设置了 `strokeStyle` 或者 `fillStyle` 的值，那么这个新值就会成为新绘制的图形的默认值。如果你要给每个图形上不同的颜色，你需要重新设置 `fillStyle` 或 `strokeStyle` 的值。</font>
+
+看代码，知用法：
+
+```js
+// 这些 fillStyle 的值均为 '橙色'
+ctx.fillStyle = "orange";
+ctx.fillStyle = "#FFA500";
+ctx.fillStyle = "rgb(255,165,0)";
+ctx.fillStyle = "rgba(255,165,0,1)";
+```
+
+## fillStyle示例
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  for (var i=0;i<6;i++){
+    for (var j=0;j<6;j++){
+      ctx.fillStyle = 'rgb(' + Math.floor(255-42.5*i) + ',' + 
+                       Math.floor(255-42.5*j) + ',0)';
+      ctx.fillRect(j*25,i*25,25,25);
+    }
+  }
+}
+```
+
+![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAEBElEQVR4Xu3cQVEEQRREwW47+EEPftDDYmew8OqwnHINTGzGi7r9vs9znvPu3+vdHzjn/P7DN/yPjHyFla3OEVbGElamOsIarIQ1YFmsjiWsbmWxBithDVgWq2MJq1tZrMFKWAOWxepYwupWFmuwEtaAZbE6lrC6lcUarIQ1YFmsjiWsbmWxBithDVgWq2MJq1tZrMFKWAOWxepYwupWFmuwEtaAZbE6lrC6lcUarIQ1YFmsjiWsbmWxBithDVgWq2MJq1tZrMFKWAOWxepYwupWFmuwuj8OVjuXu8JsJaxM5a5woRLWomWxspawMpXFWqiEtWhZrKwlrExlsRYqYS1aFitrCStTWayFSliLlsXKWsLKVBZroRLWomWxspawMpXFWqiEtWhZrKwlrExlsRYqYS1aFitrCStTWayFSliLlsXKWsLKVBZroRLWomWxspawMpXFWqiEtWhZrKwlrExlsRYqYS1aFitrCStTWayFSliLlsXKWvfbwWrGcmLfqYTVrZzYD1bCGrAsVscSVreyWIOVsAYsi9WxhNWtLNZgJawBy2J1LGF1K4s1WAlrwLJYHUtY3cpiDVbCGrAsVscSVreyWIOVsAYsi9WxhNWtLNZgJawBy2J1LGF1K4s1WAlrwLJYHUtY3cpiDVbCGrAsVscSVreyWIOVsAYsi9WxhNWtLNZgJawBy2J1LGF1K4s1WAlrwLJYHet+OVjtWi6hs5WwMpW3GxYqYS1aFitrCStTWayFSliLlsXKWsLKVBZroRLWomWxspawMpXFWqiEtWhZrKwlrExlsRYqYS1aFitrCStTWayFSliLlsXKWsLKVBZroRLWomWxspawMpXFWqiEtWhZrKwlrExlsRYqYS1aFitrCStTWayFSliLlsXKWsLKVBZroRLWomWxspawMpXFWqiEtWhZrKx1Px2sZiyX0J1KWN3K2w2DlbAGLIvVsYTVrSzWYCWsActidSxhdSuLNVgJa8CyWB1LWN3KYg1WwhqwLFbHEla3sliDlbAGLIvVsYTVrSzWYCWsActidSxhdSuLNVgJa8CyWB1LWN3KYg1WwhqwLFbHEla3sliDlbAGLIvVsYTVrSzWYCWsActidSxhdSuLNVgJa8CyWB1LWN3KYg1WwhqwLFbHuh8OVruWS+hsJaxM5e2GhUpYi5bFylrCylQWa6ES1qJlsbKWsDKVxVqohLVoWaysJaxMZbEWKmEtWhYrawkrU1mshUpYi5bFylrCylQWa6ES1qJlsbKWsDKVxVqohLVoWaysJaxMZbEWKmEtWhYrawkrU1mshUpYi5bFylrCylQWa6ES1qJlsbKWsDKVxVqohLVoWaysJaxMZbEWKmEtWhYra/0B4czzzXhhDJQAAAAASUVORK5CYII=)
+
+## strokeStyle示例
+
+> 这个示例与上面的有点类似，但这次用到的是 `strokeStyle` 属性，画的不是方格，而是用 `arc` 方法来画圆。
+
+```js
+function draw() {
+    var ctx = document.getElementById('canvas').getContext('2d');
+    for (var i=0;i<6;i++){
+        for (var j=0;j<6;j++){
+            ctx.strokeStyle = 'rgb(0,' + Math.floor(255-42.5*i) + ',' + 
+                Math.floor(255-42.5*j) + ')';
+            ctx.beginPath();
+            ctx.arc(12.5+j*25,12.5+i*25,10,0,Math.PI*2,true);
+            ctx.stroke();
+        }
+    }
+}
+```
+
+![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAgAElEQVR4Xu2dP2wbSZbGv2op487BqWNjgXO3aM7igLODiZzZCgYYqylsttA6soNLnYhs0smlDm6iO2Iyw91cAw40yi5ysHcAMechmxpgMLFTEoPNxH6HqnqiyiW1WG0W7bGnlWywcn/zqp761Z/360+g/qlHYAMjIDbwzPqR9QhgdWIR3QXwNYCvAPwRwBcAfgXwM4DXAF5BiP9eaywpNzTI0KCfgYA1ojU10ruA+BqgrwDxR4C+AMSvgNQQrwF6BdFeUyO5C9AVYyVeQSRrasSsIS6ZD3oNSI1sTY3IIY78So3yxCK6DaAD4AaA7wAcAxhDiAJEAYAmgHsA/gLgFwB9CPE/lRKM3twGAtYQrDEcQyQFKAmAPdYg1ij6EK2KGs9vA1tGHNvHwI+Gxq0mcGrEsehD/LmixiHHQTcAGcfWMVAYGkETWNwDZBziF0DG8bSixgNjrOR8BMfATUPjpAkURhxS428VNUKec3EDoO8AcQzkYwgUIARA1AToHiD+AhDP+fRSjcsTi+ivAP4TwGMI8e3KZCF6BOA/ADyEEP+18vflL9D4r4BgjR0HjQlr0EOIpqNGynGIxxCxg0b2CCCOo+2o0eE4pEbioJGwhoyj76gRcxz0GGLooLH3CBAcR+aocdOII3fQiIw4Ti5oXEwsnVRPAdyHEP/nlCQqUehLAN8DOFyZXDqpngLiPkRUQSP/EqDvATpcmVykkorjaFfQSI04ViQXyaSSGsF9iKSCRvIlUPBYrUguUknFcWQVNGIjjhXJRSqpeD7yChqRMR/vJte7iaXL398B/KlSUp1ln06uHwDcKS2Lqvxt/R0Qf6qUVEsNlVw/AIs7pWWRVPnjOCok1VJDJRdrlJRFUuWP46iQVEsNmVwyjuJOaVkkVf44jgpJtdRQycUaJWWRVPnjOCok1VJDJRfP+XlZtBPrCMCRU/kre5XpsrgLIXYv/RUaHwHiCMKh/JVqyLJIuxDNEo2UNRzKX6mGKou7EO0SjS5rOJS/Ug1VFncheiUa8RFAR07lr1RDlcVdiKxEI+Q4HMpfqYYqi7sQ06XGeWLp3d+3EOKfnctfeXL9BODRhd2i2v0V30I0PWiMfwKCRxDWbpHk7k/G0fagkXIc1m6R5O5PxtH3oNHhOKzdIsndn4wj86ARcxzWbpHk7k9q5B40ItbQu0UzsZ4BeAsh/t1DYj0BcB1C/Ns7z6L8GUBvIXY8aEyeAOI6RGRpZKzR9qCRskZsaXR5rHoeNLo8Vj1LY+8ZIN5CZB404icAXYcYWhohxzH1oBFyHFOlYSbWCMABhHjjIbFaAAYQ4l/eTazxCBAHEDseNCYtQAwgIksjHQHbBxDfeNB42QJOBxBtS6M7ArYOIDoeNPotYDGA6Fka8QgIDiBeeNDYbwHFACKzNEKej9yDRtQCaAAxVRo6sYjk/84BXFPnVOv+6HOuGYT4p+WjlEY+B4bX1DnVuj/6nGsGsWNpDOdA7lEjmkHElkYyB4RHDZpB9AwNOS/xHIg8auQziMzSCOfA9Jo6p1r3R51zhTOIqdI4S6w/qNN0IVafxLv+BxDRO8+j/A8A/Qqx41FjQu88j1KOo+1RIyUI43mUcBw9jxpdgjCeRzHHkXnUiAnCeB5FHMfUo0ZIEPp59Rvrqj8U9Vas31hO75JL31i6HH6ANVY+AsjjGkvW9Ga9xlo18/Sx1lg6sepdoT1BVO8KV+Xs+Rq6fFdYn2NdTKz6HMs1s6jsHEu/teqT97OBpPrk3TWnQFedvOvEqu8K1TjUd4UVksrhrlAnV93dsOzSqLsbrkwwcu1uWJaBuh8Lou7HWpFUFfuxzpOr7iB1rQe6haYD1B2kZ0O2+tT1g/a8F9yPftZXX/e8X8ht1fUg++o/1Z73y/5a9Z1iA8A/IAS5/kFX+j2lMW0A4YY1sgYQb1ij1wC6G9RQd4oNIPsHBDY0H1IjagB5JY3Vb6xKWVH/cj0CegTqxKozYSMjUCfWRoa1fujqxMoZWC3wFYQBrAoDWI3WBFZzBlaL4isICZPy4l2Icyg2WhNYzRlYLYg1GFgl+hkBA6vRmsBqbgCrZIwV4WcEEu4VrxCtCazmvHgvxLvzoTQYWI3WBFZzBlZL51zG8b7A6hu6jYCBVcHA6hBjJKJAQgH2GFglBlYL9NGqCKy+eXMbAQOrgoHV4XCMJCmQJAH2GFglBlaLoo9WRWD1zfPbCBhYVXFsH2P4o6HBwOoyjkUfrYrA6ptDjoNuQMWxdYxhYWgwsKriEL9AxVERWH3zwBgrBlaHNw0NBlaXcUiNisDqm5DnXNyAYGB1mI+RoECCAHsMrBIDq2rOqwCrY/orBAOrOw7A6oSBVcJDNB2B1fH4rxAMrO44EDsTBlaJHqLpCKyOU45DPMaOA7EzYWBVxeF4QDrucBxSw4HYmTCwquJwBFbHMcdBj7HjAKxOGFhVcTgCq+ObRhwOxM6EgVUVhwuwqpPqKQTuI6oArOb0JQjfg3C4Mrl0Uj2FEPcRVQBW8/xLEH0PosOVyaWTiuOowBbmqRHHiuRSSSU1gvuIKrCFefIlqOCxWpFcMqkC9BVSF1VgC/PYiGNFcumk4vmowBbmkTEfVwGrsvxt4e8Q+FOlpDpbq+rk+gEL3Ckti7L8bW39HUL8qVJSLTVUcv2AxeJOaVmU5U9pyDgqJNVSQyUXa5SURVn+tgKOo0JSLTVkcsk4ijulZVGWP6Uh46iQVEsNlVysUVIWZflTcy7no0JSLTVUcvGclwGrYwlH4ggu5a9s4yPLImEXzRJgdTyWQOwRXMpfqcbkEYh20SwBVscpaziUv1KNjDVKgNVxlzUcyl+pRsIaJcDqOD6CoCOn8leqsfcIJHbRLAFWxyHH4VD+SjUijuMyYFXu/gp8i6YHYHVMPyHAI9i7Rbn7K4pv0fQArI7HPyEIHsHeLcrdn4rDA7A6TjkOa7cod38qDg/A6rjDcVi7Rbn7U3F4AFbHMcdh7Rbl7k9peABWxxFr2MBqTs9AeIsdD8DqhJ5A4DoiC1jN82cgeosdD8DqZPIEQlxHZAGrecYaHoDVScoaFrCad3msPACrky6PlQWs5nvPQOItdjwAq5P4CQRdR2QBq3nIcXgAVichx2EDq2MaQeAAOx6A1Qm1IDBAZAGreT4C0QF2PACrk0kLQgwQWcDqOB1BbB9gxwOwOnnZgjgdILKA1bw7Am0dYMcDsDrpt0CLAZoWsDqORxDBAXY8AKuT/RaoGKBpAat5OAKJA+x4AFYnUQuCBohsYDXHHENcU+dU6/7oc64ZdixgNc/nGA6vqXOqdX/0OdcMOxawmg/nGOYeNaIZdixgNU/mGAqPGjTDjgWs5vEcw8ijRj7DjgWs5uEcw+k1dU617o865wpn2DGB1Zz+AMKv2PEIrE6I3nlenv8BRL9ixyOwOpnQO8/LU47DI7A6SQk7xvPyhOPwCKxOuoQd43l5zHF4BFYnMWHHeF4ecRwegdVJSNixgdX6jXXxb1a9Fes3ltPL7NI3lvyXvtdYhAGaH2GNlacjkMc1Fp0O0LTWWOPuCMLjGkssBog2vMYSxQDRhtdYRAM0zTWWTKx6V3jxD7PeFTq9rNQvle4K63Osi4NYn2O5J1bpOZYuh/XJ+9lQygtpKnbR3L/8E4v1yft50skLaXUTctnJu/y1+q5QD5a+iK7vCl3eV/oiesVdoX5r1d0Nyy6NDXY3yI/WFtRZ2TqjW2a4S6PCRfRvqrvhLEPrfqy6H2vV26pyP9bZA+sO0lVDe/7/1x2kF8bq/Xvel33ceHWhi8F9SnhN8wF73qVJExkmTZvoeb+yV/wT6nmXxlylvfvv2/N+WXJImHSKBsINA6vTaQPhhoHVadZAuGFgddprINwwsDqNGwg3DKxOowbCGlit+r6sf38DI7C6FG5AtH7k5z8CdWJ9/nP8USJcnVgp3YXA1yAGVglfQOBXyMW7wGsQXqG9JrCa5oYG/RFLDWForAmspuldCPE1iIFVoi8gxK+Qi3chXoPoFdprAqtpcheCrhgr8QrtNRfvacwaDKy+Mx/0GiQ11gRW08ghjvddvD9XxM65M+k2jvGjAazeQhOnhsPqAn38uSKw+lwSO4bDqtIwgNVbe6zBwOqi6OPPFYHV54rYMeLYPsaPBrB661YTp4bD6mLRx58rAqvPFbFz/n2s7a1j/GgAq7eCJk4Nh1UVR0Vg9bkidow4gmP8aACrt06aODUcVpVGRWD1OQOrgh1Wt8UxfjSA1VtRE6eGw6qa8yrAaspf9BN4jNgBWM0UmaMdPduOwGrKDqtKwwFYzSSZIzXoIdqOwGrKDqtCPEbsQOxkiszhOByB1ZQdVpWGA7GTKTKH43AEVlN2WBX0GLEDsJopMofjcARWU3ZYVXE4EDuZuh/kOFyAVZ1U2tGzXQFYTQ2H1VXJpZNKO3q2KwCrqeGwuiq5dFJxHBXYwlR92FZ+PbqD9orkUknFDqvtCmxhqkwwpRdhB+0VyaWTiuOocKWTKhNMjmNFcumk6itfw3YFtjBV3yDlOK4CVnX5046eVZLqbHmok0tfSJaVRVX+2GG1SlItNdhhVQKrZWVRlz+Oo0JSLTX4q8lKo6Qs6vKnnUmrJNVSgx1WJbBaVhZ1+eM4KiTVUoMdVpVGSVmU5U/NuYyjQlItNdhhVc15GbCactuMS/kr22vosriLdgmwmjKw6lL+SjUYWG2XAKspA6su5a9Ug4HVdgmw+qJ7hEAcOZW/Uo3kEQraxX4JsJoysOpS/ko19h6hELvYLwFWUwZWXcpfqUbEcVzWNiN3f9Jts+0BWE1JOzrYu0W5+5POpG0PwGrKDqtta7cod38qDg/AasoOq/ZuUe7+VBwegNWUHVbt3aLc/ak4PACrKTus2rtFuftTGh6A1ZSdKdo2sJoxsNr2AKymDKzGFrCaMbDa9gCspgysxhawmjGw2vYArKYMrMYWsJoxsNr2AKymDKzGFrCaMbDa9gCspgysxhawmjGw2vYArKYMrMY2sJrSCNs4wDcegNWX1MIpBmhbMEU6HmFbHOAbD8Dqy0kLp2KAtgWspukI29sH+MYDsPryZQunpwO0LZgi7Y6wvXWAbzwAqy/7LZwuBmhbMEUaj7AdHOAbD8Dqy/0WTosB2hZMkYY8Hx6A1ZdRC6c0QNsGVoeYI/cIrEaYIbaA1WE+R+4RWI32ZogtYHU4nCP3CKxG0QyxBawOkzlyj8BqRDPEFrA6jOfIPQKrUT5DbAGrw3CO3COwGoUzxCawmpJ29Gx7BFZToneel7LDatsjsJpOCObzUnZYbXsEVtOUYD4vZYfVtkdgNe0SzOel7LDa9gispjHBfF7KDqttj8BqGhL4eecOq/Ub6+KeRwKr9RvL7a5RAqsX3ljyn36SayxZ0y2H1XqNdTERPtoaS/6n1LvCixNS7wrd3lbqxVS+K6zPsexhrM+xKiRW2TmWLocaWK1P3gF5IV0Uu9gvAVZ9nbxL0LO94ZN3+anIdsnJ+4uQbxAcLp7f6+Rd/qP6rlAPnb6I1sBqfVd49VtLX0Tz/XDZXaF+a31O3Q36M9btChfROqm+B3D4O+tu4G6TChfROqm+B+gQ7au6G867FGRy/SfqfqzVa4y6H+uhnVRy0Mpbk39rHaQEbRWyyQ5SItaoO0gB+g7eO0jNv9MP2vPOJk3LPm7Zjx5wX33d867Xf596z/tlRUACqxkaiDcMrGbTBuINA6tZ1kC8YWA16zUQbxhYzeIG4g0Dq1nUQFwDq6vXRfVvbHwEVuNfG/9PqAU+xxGoE+tznNXfQEyrEyuhuyB8DfnlERiuoWCHVYFXSNYEVpOcNYqvAMNhFfQzELyG0lhz8Z6kd0Hia8ivzSgNdlhVGuI1BL1CsiawmiR3QXTFWIlXSNYEVpOYNcQl80GvIaTGmsBqEjnE8b7A6iE7rBJuQDqTbuEYhQGsBmhigXuQjp5CHgWgj6cVgdVDdlhVGoI1DGA12GMNYo2ij6cVgdVD6bAadEDSNVTGsX2MwgBWg1tNLE45Dj5ueFrxuOGQHVaJHVa3to5RGMBqEDSxWNyDdFgV7LD6tCKwesgOq8v5CI5RGMBqcNLEojDmQ45VRWD1kIFVNVb0HbbEMQoDWA2iJhZ0D9JhVcixknNeBVjtsMOqPCBNHIDVhIFV6ejZdwRWO+ywqjQcgNWEgVXp6Nl3BFY77LAqIczEAVhNGFhVcTgCqx12WFUaDsBqwsCqisMRWO2ww6oEVhMHYDVhYFXF4QisdthhVcXhcG+YMLCq4nABVmVSSUAywH0kFYDVhL5EwVchq5JLJpUEVgNxH0kFYDXJv0TBVwirkksm1TKOClc6SWrEsSK5ZFIpjeA+kgrAaqJMMI9A1FmZXDKplnFUYAsTZYJ5BEJnZXLJpFrOR4UrnUR92JbjuOpKR5c/7ehZJanOFosyueTXhgvcKS2Lqvyxw2qVpFpqsMNqsbhTWhZV+WOH1aRCUi01+KvJSqOkLOryp51JqyTVUoMdVoviDsrKoi5/PB8VkmqpwQ6rSqOkLOryx3FUSKqlBn81Wc152SV0l9tmXMpf2c5Dl8Vd9EqA1S4Dqy7lr1SDgdVeCbDaZWDVpfyVajCw2isBVrvssOpS/ko12GG1V9I202Vg1aX8lWqww2qvpG2my8CqS/kr1eDvvPcuA1bl7k+6bfY9AKsddli1d4ty9yedSfsegNUOO6zau0W5+1NxeABWO+ywau8W5e5PxeEBWO2ww6q9W5S7PxWHB2C1ww6r9m5R7v4ksJp4AFY77LCa2MBql54BeIueB2C1S08AXEfPAla7+TOA3qLnAVjtTp4A4jp6FrDazVjDA7DaTVnDAla7XR4rD8Bqt8tjZQGr3b1ngHiLngdgtRs/Aeg6ehaw2g05Dg/AajfkOGxgtUsjbOEAHQ/Aap9aWGCAngWsdvMRtugAHQ/Aan/SwoIG6FkwRTcdYWv7AB0PwGr/ZQuL0wF6FrDa7Y6wtXWAjgdgtd9vYbEYoGcBq914hK3gAB0PwGp/v4VFMUDPAla74Qhb4gAdD8BqP+L5sIHVBHMIj8AqYYaeBawm+RzCI7BKezP0LGA1Gc4hPAKrFM3Qs4DVJJlDeARWiWboWcBqEs8hPAKrlM/QM4BV2TLVDecQHoFVCmfomcBqwg6rPY/AapcI5vMSdljteQRWuxOC+byEHVZ7HoHVbkown5eww2rPI7Da7RLM5yXssNrzCKx2Y4L5vIQdVnsegdVuSODnnQOr9Rvr4p5HAquf6xuLIJBs+o0lh/SDrLHGXNN9rbHEAD3royD1GuviH8hHW2PpxKp3hfaU1LtC9z6J0l1hfY51cRB/D+dY6qxsk+dY+q2lgdX65B3QF9K7qE/eV7+19IX0Li49eZf/vL4r1IMoL6LVnWd9V7gyq/RFNN8PXwWs/ta7G9SNfdFZ2TqjW2b6ENhFlYtonVTcFeDQ3SBEH0LsVrqI/i12NyzjqHAR7dzdcJaedT9W3Y+16lVVuR/r7IGfVQfpVgfLzsurOkhlJ+yiX9oqUzbYn0sHaRL9K4i6kJYntIkOUnMAP2rPu/gZQN3z/s58fOo975f9dUpgtYcGuhsGVnvTBrobBlZ7WQPdDQOrvV4D3Q0Dq724ge6GgdVe1EC3BlZXrQ7q//8DjMBq/OsD/EfUEp/fCNSJ9fnN6W8iotWJFTOwKi4BVokX1tmawGrMwKrSoD8C+EJ9d17CpMTAarYmsBozsCouAVaJgdVsTWA1ZmC1dKzEK2RrAqsxL97FJcAqMbCarQmsxgysXhnH+wKrDxhYBW4A+A4BjnHTAFZP0ERhOKxKePFvFYHVBwysKg3BGgawerLHGuywKr+P9beKwOoDReycO5MG28e4aQCrJ7eaKAyHVXnc8LeKwOoDBlZBHMfWMW4awOpJ0ERhOKyqOCoCq3H8r/LSDcv5CI5x0wBWT06aKAyHVaVREVh9wMAq2GE1EMe4aQCrJ1ETheGwqua8CrAas8Mq4TGGDsDqHj2CYIfVzBFYjdlhVWk4AKt7E9agh8gcgdWYHVZJPMbQAVjdyx5BsMNq5gisxuywqjQcgNW9hDVkHI7AaswOq0SPMXQAVvf2HkGww2rmCKzG7LCq4nAAVvciIw4XYFUnlXb0zCoAq7HhsLoquXRS6W9eZhWA1dhwWF2VXDqp9DdIswpsYWx8g3RVcqmkYofVrAKwGksTzEJ/53RVcumk4vmowBbGhsPqquTSScXzUeFKJza+QZpdBazq8qcdPask1dlyUSeXvpAsK4uq/LHDapWkWmqww6q8IC4ri7r8cRwVkmqpwV9NVholZVGXP+1MWiWplhrssCph0rKyqMvf/+j5qJBUSw12WFUaJWVRlz+Oo0JSLTX4q8lqzssuoWOJS+PIqfyV7T10WdxFVgKsxuMjkDhyKn+lGrIs0i6yEmA1TlnDofyVaqiyKN92u5f+StxlDYfyV6qhyuIushJgNY4lvn7kVP5KNVRZ3EVWAqzGIcfhUP5KNVRZ3EV2GbAqd38SXsw8AKsxO6zau0W5+5POpJkHYDVmh1V7tyh3fyoOD8BqzA6r9m5R7v5UHB6A1ZgdVu3dotz9qTg8AKsxO6zau0W5+1MaHhr9YnamyGxgdY+eQeAtMg/AakxPQLiOoQWs7uXPIOgtMg/Aajx5AhLXMbSA1b2MNTwAq3HKGhawutflsfIArMZdHisLWN3bewYh3iLzAKzG8RMQXcfQAlb3Qo7DA7AahxyHDazGNEKAA7zwAKzuUwsFBsgsYDUejxCIA7zwAFPsT1ooxACZBVPE6QjB9gFeeABW91+2UJwOkFnAatwdIdg6wAsPwOp+v4ViMUBmAatxPEIQHOCFB2B1f7+Fohggs4DVOOT58ACs7kctFDRAZgKrIIEYc0QegdUcM2QGsKo08jkij8BqvjdDZgCrSmM4R+QRWM2jGTIDWFUayRyRR2A1pxkyA1iVMGkczxF5BFbzfIbMAlbjcI7II7CahzNkJrAas8Nq5hFYjYlgPi9mh9XMI7AaTwjm82J2WM08AqtxSjCfF7PDauYRWI27BPN5MTusZh6B1TgmmM+L2WE18wisxiGBn8dXOvUb69INjwRW6zeW692jgHwDvvPGkv/0k1xjyZpufRSkXmNdTISPt8YCUO8KL05IvSt0fVsBV+wK63Msexjrc6wKiVV2jqXLYX3yfjaU+kK6Pnl3SS19IV1y8i4fUN8V6mHUF9EaWP2Yd4UP+OO2n8JdIcRtZPn/nuXhxUa/9bobjgB08Ol3N3AcK1pndMtMH5B3cVW7G+gIoI5jdwN3aVS4iP5NdTecdyloh9W6H2t1Iaj7sR7CapmRg1bemvy77CBly5PfYgepLotGJ+wH7iCVubIf3Vqvg9T8O/2gPe+2SZP4Gcu++rrnXa//PvWe90uLgDqhbyDDPwBBq+vE+/yG1Jg2kIUb1sgayOINa/QayLob1FB3ig1k2T8AbGg+pEbUQJZX0lhN6bxPbtT/5nc/AnVi/e5TYDMDUCfWZsb1d//U1YkVOTis5msCq9GZw6oNrBpfm8nXXLxHDg6r+ZrAauTgsJqvCaxGDl+bydcEViMHh9X8fYHVkG6rw06BGyB8B4Fj5BgDogAoQIQmCPcg8BcQflGo1bQisBq+uQ0ErCFYYzgGkgJIAkR7rEGsUfQxrQishs9vA1tGHNvHyH80NG41QaccB/0CSI2KwGp4yHHwd6XE1jHywtAImqDFPQgZh2CNisBq+MAYKzkfwTHym4bGSRNUGPMh46gIrIYhz/lZHOIYeT4GUAAIEEVNEN2DEH8BybGSc14FWL1pOKzmDsBqZDisnjgCqzcNh9XcAViNDIfVE0dg9abhsJo7EDuR4bB64gis3jQcVnMHYicyHFZPHIHVm4bDau4ArEaGw+qJI7B603BYzR2InchwWD1xAVZ1Uj2FwH3kFYDVSJlgfg/CIVYll0qqQH8fNK8ArEbKBPN7EB1iVXLppOI4KrCFkfoGKcexIrlUUkmN4D7yClc6keGwuiq5dFLxWFW40omUCSbHsSK5dFI9hRD3kVdgCyPDYdVKrnfXWLr8aUfPKkl1tlTVyfUDgDulZVGVP3ZYrZJUSw12WMXiTmlZ1OWP46iQVEsN/mqy0igpi7r8aWfSKkm11GCHVSFuI0+Wl7fvrPp1+eM4KiTVUoMdVlHcKS2LuvxxHBWSaqnBX01Wc14GrIb8nXeX8le279FlcRfTEmA1ZIdVl/JXqsEOq9MSYDV8cQQRHMGl/JVqyLJY7GK6fzmwGrLDqkv5K9Vgh9VpCbAassOqS/kr1WCH1WkJsBqyw6pL+SvV4O+8Ty8DVuXuT8KLuQdgNWJg1d4tyt2fBD1zD8BqxMCqvVuUuz8VhwdgNWJg1d4tyt2fisMDsBolPwF4BHu3KHd/Kg4PwGrEwKq9W5S7P6XhAViNuNGPd4vnpTBkL52pB2A1ZIfVqQWshuywOvUArIbssDq1gNWQHVanHoDVkB1WpxawGrLD6tQDsBqyw+rUAlZDdlidegBWQ3ZYnVrAasgOq1MPwGrIDqtTG1gNaQSBA+QegNWIWiAMMLWA1XA8ghAHyD0Aq9GkBRIDTC1gNUxHENsHyD0Aq9HLFuh0gKkFrIbdEcTWAXIPwGrUb4EWA0wtYDWMRxDBAXIPwGq03wIVA0wtYDUMeT48AKtR1ALRAFMbWA0xxxTX9DnVuj8UIMQMUwtYDfM5psNr+pxq3Z8kQLg3w9QCVsPhHNPco0Y0w9QCVsNkjqnwqEEzTC1gNYznmEYeNfIZphawGoZzTKfX+Jxq3QkJEIYzTE1gNWKH1alHYDUkgvm8iB1Wpx6B1XBCMJ8XscPq1COwGqYE83kRO6xOPQKrYZdgPi9ih9WpR2A1jAnm8yJ2WJ16BFbDkMDPOwdW6zfWJX+x8q34ObyxIKDegB/6jSWHtF5jXUysekAAhRUAAAEpSURBVI3lXh4vX2OpxNIOq/Wu8Hww612he2KV7grrc6xL3lgf4hyLP7z22Z5j6XKoHVY/+ZP39AhCeDh5p11MSz4VWZ+8n/8h6gvpXVx68q4Tq74rlOOgL6J/wIe4K1T3eCUtNJ/NXaEc1PW6G7QzqVN3w9lt+ka7G7groMJFtE4qjsOlu4EdVqtcRFfvbuAujQoX0bq7geNw6m7QTrEb6W44e7nV/VgPUfdjXb1wr9yPdfa4z6qDVHapyq5I2Xm5yQ5SugGSnbAfuoMUAtH+rXc6SKWzZJ5d3o5TljIb7yA1hT9qzzv9DLBJU93zrmflk+95vzSrSSBCA/mGgdVo2kC+YWA1yhrINwysRr0G8g0Dq1HcQL5hYDWKGshrYNX9UK/+zY2NwP8DyYm4Sm35gYQAAAAASUVORK5CYII=)
+
+
+
+# 透明度（Transparency）
+
+> 我们还可以用 canvas 来绘制半透明的图形。**通过设置 `globalAlpha` 属性或者使用一个半透明颜色作为轮廓或填充的样式。**
+
+[`globalAlpha = transparencyValue`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/globalAlpha)
+这个属性影响到 canvas 里**所有图形的透明度**，有效的值范围是 0.0 （完全透明）到 1.0（完全不透明），默认是 1.0。
+
+*不过，为了更好的可操作性，可以这样写：*`strokeStyle` 和 `fillStyle` 属性接受符合 CSS 3 规范的颜色值，那我们可以直接用`rgba`设置透明度的颜色。
+
+```js
+// 指定透明颜色，用于描边和填充样式
+ctx.strokeStyle = "rgba(255,0,0,0.5)";
+ctx.fillStyle = "rgba(255,0,0,0.5)";
+```
+
+## `globalAlpha` 示例
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  // 画背景
+  ctx.fillStyle = '#FD0';
+  ctx.fillRect(0,0,75,75);
+  ctx.fillStyle = '#6C0';
+  ctx.fillRect(75,0,75,75);
+  ctx.fillStyle = '#09F';
+  ctx.fillRect(0,75,75,75);
+  ctx.fillStyle = '#F30';
+  ctx.fillRect(75,75,75,75);
+  ctx.fillStyle = '#FFF';
+
+  // 设置透明度值
+  ctx.globalAlpha = 0.2;
+
+  // 画半透明圆
+  for (var i=0;i<7;i++){
+      ctx.beginPath();
+      ctx.arc(75,75,10+10*i,0,Math.PI*2,true);
+      ctx.fill();
+  }
+}
+```
+
+![img](data:image/png;base64,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)
+
+## `rgba()` 示例
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+
+  // 画背景
+  ctx.fillStyle = 'rgb(255,221,0)';
+  ctx.fillRect(0,0,150,37.5);
+  ctx.fillStyle = 'rgb(102,204,0)';
+  ctx.fillRect(0,37.5,150,37.5);
+  ctx.fillStyle = 'rgb(0,153,255)';
+  ctx.fillRect(0,75,150,37.5);
+  ctx.fillStyle = 'rgb(255,51,0)';
+  ctx.fillRect(0,112.5,150,37.5);
+
+  // 画半透明矩形
+  for (var i=0;i<10;i++){
+    ctx.fillStyle = 'rgba(255,255,255,'+(i+1)/10+')';
+    for (var j=0;j<4;j++){
+      ctx.fillRect(5+i*14,5+j*37.5,14,27.5)
+    }
+  }
+}
+```
+
+
+
+# 线型（Line styles）
+
+> 我们有特定的属性来设置线的样式
+
+- [`lineWidth = value`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineWidth)
+
+  设置线条宽度。
+
+- [`lineCap = type`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineCap)
+
+  设置线条末端样式。
+
+- [`lineJoin = type`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineJoin)
+
+  设定线条与线条间接合处的样式。
+
+- [`miterLimit = value`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/miterLimit)
+
+  限制当两条线相交时交接处最大长度；所谓交接处长度（斜接长度）是指线条交接处内角顶点到外角顶点的长度。
+
+- [`getLineDash()`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/getLineDash)
+
+  返回一个包含当前虚线样式，长度为非负偶数的数组。
+
+- [`setLineDash(segments)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/setLineDash)
+
+  设置当前虚线样式。
+
+- [`lineDashOffset = value`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineDashOffset)
+
+  设置虚线样式的起始偏移量。
+
+**理解不了？来个栗子：**
+
+## `lineWidth` 属性的例子
+
+> 这个属性设置当前绘线的粗细。属性值必须为正数。默认值是1.0。
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  for (var i = 0; i < 10; i++){
+    ctx.lineWidth = 1+i;
+    ctx.beginPath();
+    ctx.moveTo(5+i*14,5);
+    ctx.lineTo(5+i*14,140);
+    ctx.stroke();
+  }
+}
+```
+
+![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAFLUlEQVR4Xu3d0Y7TMBCF4eyTA08Oaht3Q2r7jJF8xccNEvHGy9HvmfEZu/06/KHABgW+NrzTKylwAAsEWxQA1hZZvRRYGNiiQA+sn+dM7e/qxL/PgSuwPub4cf7cr+M4qnO2udrvVpnzOlf7ucqc97kqc/bmqsw5mms252yu2Zxprsr/c8gGsDLMwKqGlss4YAErYVPJBh/vABawgHVRQI31LYYaq7M0FO9/i5IK6lGGaRugUfTpbVLSXIr34ygZvXaFaxADC1hvy0bEunhlfKxvHFJ6kgrTVgNYXYWA1ZGF817bqc3cfmABa7ph0NIZWACPf6727dorRCwR660A5z0vIL3CYsF8HQYsYCVs9AqDQgxSBmlaRIdeYa2ea6O0dCJSrwHAAtYUFU3otfTEeS9GHmABK6LCx6qlJ857RKm/2la2pyKWiBUxE7FELM77qYDrXzFelA5RfryF8855T2itlDYiloj14QWOAAOWls5QAc57isvnc857baOgpXMcR6WQbkIBC1haOjcFGKTFtHSPIivFHoOUQRoxY5DW0pOIFVHS0hlJ5DJFRxkfvFZLT7OUDyxgxdtILlMspq7HcC0dLZ2EzcpmTEtHS0dLp7eiGKS1HSjnnfP+ZMBnN3TCCB+rFkX4WKmquz0HFrAU74r3mHYbJHaFIcK6Yl8zfu8yAgtYQwUc9CvWdeyGWj3HbmA3sBtGQcWusBZF2A3FtNSGAQtY7AZ2A7tBr/BbAR9jVEyjzryveUvAAtbw+20U70U4FO+fQjma3IHHmfdaenLmfRJ5HE12NDklJr1CvUK9wqaAXWEt7bZRdoUpvp7PgQWsiIqWjpaOlo6WjpaOlo6WzlOBle2pGkuNpca6KcAgZZA+FXCZYi06ziyOGGU475z3BMlKaWNXaFdoV2hXaFdoV9jpKNwXhvNYKfnennPeOe9qLDWWGkuNpcZSY6mxXgrwsfhYqZTmYwWFOO+c97SIPgrPyqoCFrCANVDA0eSIxmuAYzNrUQRYwHIT+s6AC6u1KOI81iR6sBvYDSm5VDZGH+8AFrCAdVHAh9vWGt5tlE9NTsvnfA4sYE1RYTfUNgptFLuhGHmABayIioN+tfTkBGlEqb/aVranIpaIFTETsUSstwJ8LD5WihgrGQhYpwKzeqeJNPo6XS0dLZ2nAs5jrdVzM4sjRTlHk0/gZkKJWBGjzwFqLDVWwkaNFRSSCqXCtIiceb8oNPsWjDZMEzoi9RqgCV3zzIDlq3u7C+a+zjShi5FHS2et7gEWsFymuDPgMkUtinDeOe+c944RPDJ+K3VdTEgMUgZpgoRByiAdKsDHSsvnfM7H4mNNUWE31DYKbRS7oRh5gAWsiIqjybX05DJFRKm/2lZ2ESKWiBUxE7FErLcCfCw+VooYKxkIWKcCLlMkrNa+2BRYwPLNFL01xSCt1XNtFOc9R+bnCGABi/N+U4CPVYwebRi7oRZFgAWsbtqd9e3as9nNGWABC1iDL/KKaDBIGaQJEgZpUMhN6LW+ZCXlDyUXsUQsEeuiAB+rtgNlkLoJPd0ozNKSz27oxFznsdbqHkeTU+I+nwMLWBEVznut7mGQRpT6q23F9xCxRKyImYglYr0V4GPxsVLEWMlAwDoVcDQ5YeVoclRIS2etntPSKXbggQWsGH20dGobBS0dLR0tnVE4YTfUosh/a5DGPGQABZIC/+RRpJd6TgFgYWCLAsDaIquXAgsDWxQA1hZZvRRYGNiiALC2yOqlwMLAFgWAtUVWL/0DAnFjAKGq4NkAAAAASUVORK5CYII=)
+
+
+
+## `lineCap` 属性的例子
+
+> 属性 `lineCap` 的值决定了线段端点显示的样子。它可以为下面的三种的其中之一：`butt`，`round` 和 `square`。默认是 `butt。`
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  var lineCap = ['butt','round','square'];
+
+  // 创建路径
+  ctx.strokeStyle = '#09f';
+  ctx.beginPath();
+  ctx.moveTo(10,10);
+  ctx.lineTo(140,10);
+  ctx.moveTo(10,140);
+  ctx.lineTo(140,140);
+  ctx.stroke();
+
+  // 画线条
+  ctx.strokeStyle = 'black';
+  for (var i=0;i<lineCap.length;i++){
+    ctx.lineWidth = 15;
+    ctx.lineCap = lineCap[i];
+    ctx.beginPath();
+    ctx.moveTo(25+i*50,10);
+    ctx.lineTo(25+i*50,140);
+    ctx.stroke();
+  }
+}
+```
+
+![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAGQklEQVR4Xu2dMW4UTRCFnzkFiIgzGAIChMUZsCVMZpxwBgIg4AxICJxhJPYOlhEBAXAGIgSnwKixVwwr70xVb03X7PJN9PPv656u7q9fv+nEW+JhBkaYga0R+qRLZkCANQzBVUn3JN24kH6TdCLp53DTNMWzFd+8anvA6lmAAtQLSQdLNEeSnkwUsALG00q4nksCrMrJG2p2W9JM0vUB4XdJu5I+DXXY+HfAajzhltcVp/pigGreV4Hr5sScC7AsK91Y86bn+Fs2lHIsPmo8zr7XAdaEFqMMpbjVj8oxXZuQawFW5SKO1Wxf0tvKzh9KOq5sG91sjcB6eXb+pXBFZ/rV+Zrs/nvZf/dN22J/y7RFV57uu/u0y3R9Yzzav6PP78rVgv+59eBEB8cf/Q1HaPF6766+znaqet7ePdXh+w9L2z7eMn0x2u+x5mBd9sYxC6mancpG1CE1B6t/rdKttxKlxWbUIU3qHosFCVqQTdkg9qMQxxpa85CdPvQS4+/pGx2w/l2p9AUxgjMkS68DsABrEdIQ5wUswAKsIf8P+D39CAmooXSRXgeOhWPhWEG7ua+b9J0eVGN6HTgWjoVjBe1mHKt/IvkqHAG09CMkqKb0OjgKOQo5CoN2M0chR2EDlHAsHKsBZunZJKjG9DrIWDgWjhW0m8lYZKwGKOFYOFYDzNKzSVCN6XWQsXAsHCtoN5OxyFgNUMKxcKwGmKVnk6Aa0+sgY+FYOFbQbiZjkbEaoIRj4VgNMEvPJkE1ptdBxsKxcKyg3UzGImM1QAnHwrEaYJaeTYJqTK+DjIVj4VhBu5mMRcZqgBKOhWM1wCw9mwTVmF4HGQvHwrGCdjMZi4zVACUcC8dqgFl6NgmqMb0OMhaOhWMF7WYyFhmrAUo4Fo7VALP0bBJUY3odZCwcC8cK2s1kLDJWA5RwLByrAWbp2SSoxvQ6yFg4Fo4VtJvJWGSsBijhWDhWA8zSs0lQjel1kLFwLBwraDeTschYDVDCsXCsBpilZ5OgGtPrIGPhWDhW0G4mY5GxGqCEY+FYDTBLzyZBNabXQcbCsXCsoN1MxiJjNUAJx8KxGmCWnk2Cakyvg4y1mY71VFKBq+bhr9jXzNpAm/SdHlTTKmCVOShwrfTgWDjWIkCAtdKWurwxjnV+hOJYwXBtCljpdXAUbuZRCFgXtlv7BRNsWH+OgRJ8a56Qr6maF1/SJr0OHAvH4oI0aDf3dZO+04NqTK8Dx8KxcKyg3fw/OBYXpIT3UbYLYAEWYP0PR0h66A3CLL0OwjvhnfAetJtx3v6JDLnoxbFwLBwLxzLPABmLr0IzLB4hYAGWhxezFrAAywyLR8gFKWB5eDFrAQuwzLB4hByFgOXhxawFLMAyw+IRAhZgeXgxawELsMyweISABVgeXsxawAIsMyweIWABlocXsxawAMsMi0fIBSlgeXgxa3EswDLD4hECFmB5eDFrAQuwzLB4hIAFWB5ezFrAAiwzLB4hYAGWhxezlusGwDLD4hHiWIDl4cWsBSzAMsPiEQIWYHl4MWsBC7DMsHiEgAVYHl7MWsACLDMsHiFgAZaHF7MWsADLDItHyAUpYHl4MWtxLMAyw+IRAhZgeXgxawELsMyweISABVgeXsxawAIsMyweIWABlocXsxawAMsMi0cIWIDl4cWs5YIUsMyweISABVgeXsxawAIsMyweIRkLsDy8mLWABVhmWDxCwAIsDy9mLWABlhkWjxCwAMvDi1m7RmC9PCuDla7oTL/09+8cln+/2tvR19mOueyucPv+qQ5nHwbblveUp/vuZY0Wx9jVdX9b1L3eu1tfx+6pDt8P1zFYaIBgzDoeb51zMPDY/xDmHKyhHtf596P9O/r87l5VCbcenOjg+GNV2+hGawVWdPHT7G9f0tvKoT2UdFzZNrrZxlyQRk9MVn9XJf2ofPk1ST8r20Y3W6OMFV36dPt7I+nAObwjSY+cbcaUA9aYs1vZd3GtL5KuG9t/l3RzQm5Vhg1YxsVrLbstaWaAq0C1K+lT6wEOvA+wJrYg3eEU53rRcyyW4+/JxJxqPn7AmjBY86EVwMoVxI2L//FN0slEgZqPuXwVlqd7nVTuAa3XS6a7qr61s75oDdafIU5pBgBrSquxQWP5DUMCpMTbc4S7AAAAAElFTkSuQmCC)
+
+
+
+## `lineJoin` 属性的例子
+
+> `lineJoin` 的属性值决定了图形中两线段连接处所显示的样子。它可以是这三种之一：`round`, `bevel` 和 `miter。`默认是 `miter`。
+
+```js
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  var lineJoin = ['round', 'bevel', 'miter'];
+  ctx.lineWidth = 10;
+  for (var i = 0; i < lineJoin.length; i++) {
+    ctx.lineJoin = lineJoin[i];
+    ctx.beginPath();
+    ctx.moveTo(-5, 5 + i * 40);
+    ctx.lineTo(35, 45 + i * 40);
+    ctx.lineTo(75, 5 + i * 40);
+    ctx.lineTo(115, 45 + i * 40);
+    ctx.lineTo(155, 5 + i * 40);
+    ctx.stroke();
+  }
+}
+```
+
+![img](data:image/png;base64,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)
+
+
+
+## 使用虚线
+
+> 用 `setLineDash` 方法和 `lineDashOffset` 属性来制定虚线样式. `setLineDash` 方法接受一个数组，来指定线段与间隙的交替；`lineDashOffset `属性设置起始偏移量.
+
+```js
+var ctx = document.getElementById('canvas').getContext('2d');
+var offset = 0;
+
+function draw() {
+  ctx.clearRect(0,0, canvas.width, canvas.height);
+  ctx.setLineDash([4, 2]);
+  ctx.lineDashOffset = -offset;
+  ctx.strokeRect(10,10, 100, 100);
+}
+
+function march() {
+  offset++;
+  if (offset > 16) {
+    offset = 0;
+  }
+  draw();
+  setTimeout(march, 20);
+}
+
+march();
+```
+
+![img](https://mdn.mozillademos.org/files/9853/marching-ants.png)
+
+
+
+# 渐变 Gradients
+
+> 对的，既然都有颜色和透明度的选择了，为什么我们会没有渐变呢？
+> 我们用下面的方法新建一个 `canvasGradient` 对象，并且赋给图形的 `fillStyle` 或 `strokeStyle` 属性。
+
+- [`createLinearGradient(x1, y1, x2, y2)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/createLinearGradient)
+
+  该方法接受 4 个参数，表示渐变的起点 (x1,y1) 与终点 (x2,y2)。
+
+- [`createRadialGradient(x1, y1, r1, x2, y2, r2)`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/createRadialGradient)
+  该方法接受 6 个参数，前三个定义一个以 (x1,y1) 为原点，半径为 r1 的圆，后三个参数则定义另一个以 (x2,y2) 为原点，半径为 r2 的圆。
+
+```js
+var lineargradient = ctx.createLinearGradient(0,0,150,150);
+var radialgradient = ctx.createRadialGradient(75,75,0,75,75,100);
+```
+

@@ -1,0 +1,5 @@
+* [此页说明](/study-notes/python/)
+* [python语法(一)](/study-notes/python/python_1)
+* [python语法(二)](/study-notes/python/python_2)
+* [python语法(三)](/study-notes/python/python_3)
+* [上一级](/study-notes/)
