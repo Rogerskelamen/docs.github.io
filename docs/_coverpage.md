@@ -8,5 +8,5 @@
 - 无需生成 html 文件
 - 众多 *(hen shao)* 主题
 
-[GitHub](https://github.com/Rogerskelamen/)
+<!-- [GitHub](https://github.com/Rogerskelamen/) -->
 [Get Started](#Introduction)
