@@ -22,7 +22,6 @@
   <script src="//unpkg.com/prismjs/components/prism-php.js"></script>
   <script src="//unpkg.com/prismjs/components/prism-python.js"></script>
 
-
 </head>
 
 <body class="close">
@@ -34,13 +33,12 @@
     <a href="http://39.98.122.169" style="color: purple;">homepage</a>
   </nav>
 
-  <div id="app">Σ(っ °Д °;)っ</div>
+  <div id="app" style="font-size: 30px;text-align: center;">Σ(っ °Д °;)っ不会吧，不会吧，我卡了？</div>
 
   <script>
     window.$docsify = {
       name: `
-      <span style="color: rgb(55, 0, 255);font-family:  sans-serif;">RO's Docs</span>
-
+        <span style="color: rgb(55, 0, 255);font-family:  sans-serif;">RO's Docs</span>
       `,
       nameLink: '/',
       repo: 'https://github.com/Rogerskelamen/',
@@ -54,10 +52,26 @@
       mergeNavbar: true,
       // formatUpdated: '{MM}/{DD} {HH}:{mm}',  // 文档更新日期，需要调用自定义的函数
       // notFoundPage: 'my404.md',
-
+      
+      /*--------- 插件配置区 --------*/
+      // copy代码插件配置
+      copyCode: {
+        buttonText : 'Copy',
+        errorText  : 'Error',
+        successText: 'Copied'
+      },
+      // 全局搜索配置
+      search: {
+        maxAge: 86400000, // 过期时间，单位毫秒，默认一天
+        paths: 'auto',
+        placeholder: 'Type to search',
+        noData: 'No Results!',
+        depth: 6          // 搜索标题的最大程级, 1 - 6
+      },
     }
   </script>
 
+  <!-- 获取最新版本 -->
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 
   <!-- 代码高亮 -->
@@ -66,6 +80,14 @@
   <script src="//cdn.jsdelivr.net/npm/prismjs@1.22.0/components/prism-scss.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1.22.0/components/prism-sass.min.js"></script>
   
+  <!-- 粘贴到剪切板插件 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code"></script>
+
+  <!-- 文章页脚显示上一个下一个插件 -->
+  <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
+
+  <!-- 全局搜索插件 -->
+  <script src="//unpkg.com/docsify/lib/plugins/search.js"></script>
 
 </body>
 
