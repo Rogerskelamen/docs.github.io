@@ -33,7 +33,7 @@
     <a href="http://39.98.122.169" style="color: purple;">homepage</a>
   </nav>
 
-  <div id="app" style="font-size: 30px;text-align: center;">Σ(っ °Д °;)っ不会吧，不会吧，我卡了？</div>
+  <div id="app" style="font-size: 30px;text-align: center;">Σ(っ °Д °;)っ不会吧，不会吧，我卡了？！</div>
 
   <script>
     window.$docsify = {
@@ -49,7 +49,7 @@
       subMaxLevel: 3,
       coverpage: true,
       // logo: '/_media/logo.png',  // 侧边栏里的logo
-      mergeNavbar: true,
+      mergeNavbar: false,
       // formatUpdated: '{MM}/{DD} {HH}:{mm}',  // 文档更新日期，需要调用自定义的函数
       // notFoundPage: 'my404.md',
       
@@ -68,6 +68,14 @@
         noData: 'No Results!',
         depth: 6          // 搜索标题的最大程级, 1 - 6
       },
+      // 字数统计配置
+      count:{
+        countable:true,
+        fontsize:'0.9em',
+        color:'rgb(90,90,90)',
+        language:'chinese'
+      },
+      /*--------- 插件配置区 --------*/
     }
   </script>
 
@@ -88,6 +96,9 @@
 
   <!-- 全局搜索插件 -->
   <script src="//unpkg.com/docsify/lib/plugins/search.js"></script>
+
+  <!-- 文字统计插件 -->
+  <script src="//unpkg.com/docsify-count/dist/countable.js"></script>
 
 </body>
 
