@@ -16,9 +16,16 @@
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css"> -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
 
+  <!-- 代码高亮 -->
+  <script src="//unpkg.com/docsify"></script>
+  <script src="//unpkg.com/prismjs/components/prism-bash.js"></script>
+  <script src="//unpkg.com/prismjs/components/prism-php.js"></script>
+  <script src="//unpkg.com/prismjs/components/prism-python.js"></script>
+
+
 </head>
 
-<body>
+<body class="close">
 
   <!-- 导航链接 -->
   <nav>
@@ -31,18 +38,35 @@
 
   <script>
     window.$docsify = {
-      name: '',
-      repo: '',
+      name: `
+      <span style="color: rgb(55, 0, 255);font-family:  sans-serif;">RO's Docs</span>
+
+      `,
+      nameLink: '/',
+      repo: 'https://github.com/Rogerskelamen/',
       loadSidebar: true,
       // alias: {
       //   '/.*/_sidebar.md': '/_sidebar.md'
-      // },     要想自定义侧边栏，就把这个注释打开
+      // },     // 要想自定义侧边栏，就把这个注释打开
       subMaxLevel: 3,
       coverpage: true,
+      // logo: '/_media/logo.png',  // 侧边栏里的logo
+      mergeNavbar: true,
+      // formatUpdated: '{MM}/{DD} {HH}:{mm}',  // 文档更新日期，需要调用自定义的函数
+      // notFoundPage: 'my404.md',
 
     }
   </script>
+
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+
+  <!-- 代码高亮 -->
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.22.0/components/prism-python.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.22.0/components/prism-scss.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1.22.0/components/prism-sass.min.js"></script>
+  
+
 </body>
 
 </html>
