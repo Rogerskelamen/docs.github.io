@@ -6,7 +6,7 @@
 pip install requests
 ```
 
-***这里分享一个镜像网站：https://pypi.tuna.tsinghua.edu.cn/simple（清华源）***
+***这里分享一个镜像网站：https://pypi.tuna.tsinghua.edu.cn/simple （清华源）***
 
 > 接着你得引入requests：`import requests`
 
