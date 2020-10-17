@@ -18,8 +18,8 @@
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"> -->
   <link rel="stylesheet" href="css/theme-simple-dark.css">
 
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">  
-  <!-- <link rel="stylesheet" href="//unpkg.com/gitalk/dist/gitalk.css"> -->
+  <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">   -->
+  <link rel="stylesheet" href="//unpkg.com/gitalk/dist/gitalk.css">
 
 </head>
 
@@ -80,17 +80,6 @@
       /*--------- 插件配置区 --------*/
     };
 
-    // gitalk选项配置
-    const gitalk = new Gitalk({
-      clientID: '15a40ebea2ea46adbd6b',
-      clientSecret: '28fc2312779d30660021cd6fe93abf19a65f5e0c',
-      repo: 'docs.github.io',
-      owner: 'Rogerskelamen',
-      admin: ['Rogerskelamen'],
-      // facebook-like distraction free mode
-      distractionFreeMode: false
-    });
-
   </script>
 
   <!-- 获取最新版本 -->
@@ -130,11 +119,25 @@
   <script src="js/plugins/emoji.min.js"></script>
 
   <!-- gitalk的js引入 -->
-  <!-- <script src="//unpkg.com/docsify/lib/plugins/gitalk.min.js"></script>
-  <script src="//unpkg.com/gitalk/dist/gitalk.min.js"></script> -->
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
+  <script src="//unpkg.com/docsify/lib/plugins/gitalk.min.js"></script>
+  <script src="//unpkg.com/gitalk/dist/gitalk.min.js"></script>
+  <!-- <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script> -->
 
+  <script>
+    
+    // gitalk选项配置
+    const gitalk = new Gitalk({
+      clientID: '15a40ebea2ea46adbd6b',
+      clientSecret: '28fc2312779d30660021cd6fe93abf19a65f5e0c',
+      repo: 'docs.github.io',
+      owner: 'Rogerskelamen',
+      admin: ['Rogerskelamen'],
+      // facebook-like distraction free mode
+      distractionFreeMode: false
+    });
+  </script>
+  
 </body>
 
 </html>
