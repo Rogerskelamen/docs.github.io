@@ -18,7 +18,8 @@
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"> -->
   <link rel="stylesheet" href="css/theme-simple-dark.css">
 
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">  <!-- gitalk的css引入-->
+  <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">  gitalk的css引入 -->
+  <link rel="stylesheet" href="//unpkg.com/gitalk/dist/gitalk.css">
 
 </head>
 
@@ -32,7 +33,6 @@
   </nav>
 
   <div id="app" style="font-size: 30px;text-align: center;">Σ(っ °Д °;)っ不会吧，不会吧，我卡了？！</div>
-  <div id="gitalk-container"></div>
 
   <script>
     // docsify配置项
@@ -84,13 +84,12 @@
     const gitalk = new Gitalk({
       clientID: '15a40ebea2ea46adbd6b',
       clientSecret: '28fc2312779d30660021cd6fe93abf19a65f5e0c',
-      repo: 'https://github.com/Rogerskelamen/rogerskelamen.github.io',
+      repo: 'rogerskelamen.github.io',
       owner: 'Rogerskelamen',
       admin: ['Rogerskelamen'],
       // facebook-like distraction free mode
       distractionFreeMode: false
     });
-    gitalk.render('gitalk-container');
 
   </script>
 
@@ -131,8 +130,10 @@
   <script src="js/plugins/emoji.min.js"></script>
 
   <!-- gitalk的js引入 -->
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
+	<script src="//unpkg.com/docsify/lib/plugins/gitalk.min.js"></script>
+	<script src="//unpkg.com/gitalk/dist/gitalk.min.js"></script>
+  <!-- <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script> -->
 
 </body>
 
