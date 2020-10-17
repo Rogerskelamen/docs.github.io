@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8">
@@ -18,8 +18,7 @@
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"> -->
   <link rel="stylesheet" href="css/theme-simple-dark.css">
 
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">  
-  <!-- <link rel="stylesheet" href="//unpkg.com/gitalk/dist/gitalk.css"> -->
+  <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">  gitalk的css引入 -->
 
 </head>
 
@@ -119,28 +118,26 @@
   <script src="js/plugins/emoji.min.js"></script>
 
   <!-- gitalk的js引入 -->
-  <!-- <script src="//unpkg.com/docsify/lib/plugins/gitalk.min.js"></script>
-  <script src="//unpkg.com/gitalk/dist/gitalk.min.js"></script> -->
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
+  <!-- <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script> -->
 
   <script>
     // gitalk选项配置
-    const gitalk = new Gitalk({
-      clientID: '15a40ebea2ea46adbd6b',
-      clientSecret: '28fc2312779d30660021cd6fe93abf19a65f5e0c',
-      repo: 'docs.github.io',
-      owner: 'Rogerskelamen',
-      admin: ['Rogerskelamen'],
-      // facebook-like distraction free mode
-      distractionFreeMode: false
-    });
+    // const gitalk = new Gitalk({
+    //   clientID: '15a40ebea2ea46adbd6b',
+    //   clientSecret: '28fc2312779d30660021cd6fe93abf19a65f5e0c',
+    //   repo: 'docs.github.io',
+    //   owner: 'Rogerskelamen',
+    //   admin: ['Rogerskelamen'],
+    //   // facebook-like distraction free mode
+    //   distractionFreeMode: false
+    // });
     // 监听URL中hash的变化，如果发现换了一个MD文件，那么刷新页面，解决整个网站使用一个gitalk评论issues的问题。
-    window.onhashchange = function (event) {
-      if (event.newURL.split('?')[0] !== event.oldURL.split('?')[0]) {
-        location.reload()
-      }
-    }
+    // window.onhashchange = function (event) {
+    //   if (event.newURL.split('?')[0] !== event.oldURL.split('?')[0]) {
+    //     location.reload()
+    //   }
+    // }
   </script>
 
 </body>
