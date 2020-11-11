@@ -6,7 +6,7 @@
 pip install requests
 ```
 
-***这里分享一个镜像网站：https://mirrors.tuna.tsinghua.edu.cn/help/pypi/ （清华源）***
+***这里分享一个镜像网站：https://pypi.tuna.tsinghua.edu.cn/simple（清华源）***
 
 > 接着你得引入requests：`import requests`
 
@@ -158,7 +158,7 @@ ul_text = selector.xpath("string(//ul)")	# 使用string()提取全部文本
 
 
 
-# 咱们看个成功的案例
+# 咱们看几个个成功的案例
 
 ```python
 import requests
@@ -179,4 +179,36 @@ for img in img_top:
 ```
 
 *注：你得在根目录下建立一个img/文件夹*
+
+**这个程序其实只能爬取网站中的缩略图，我们其实可以利用<u>多层的</u>网站源码爬取来获取真正的图片（需要一点前端的基础知识），然后我们再将其封装成函数就完美了。**
+
+```python
+import requests
+from lxml import etree
+
+
+def getpicture(query):
+    url_query = 'https://wallhaven.cc/search?q=' + query
+    r = requests.get(url_query)
+    r.encoding = 'utf-8'
+    selector = etree.HTML(r.text)
+    url_list = selector.xpath('//*[@id="thumbs"]/section/ul/li/figure/a/@href')
+    for url in url_list:
+        name = url[23:] + '.jpg'   # 给每个图片起个名字
+        re = requests.get(url)
+        re.encoding = 'utf-8'
+        selector2 = etree.HTML(re.text)
+        image_url = selector2.xpath('//*[@id="wallpaper"]/@src')[0]
+        print('正在从%s中爬取...' % image_url)
+        print()
+        image = requests.get(image_url)
+        with open('img/' + name, 'wb') as f:
+            f.write(image.content)
+        print('%s爬取成功！' % name)
+
+
+if __name__ == "__main__":
+    query = input('请输入爬取图片的关键词：')
+    getpicture(query)
+```
 
