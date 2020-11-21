@@ -160,7 +160,9 @@ CODES ENDS
 
 
 
-*对输入的字符串进行词频统计*
+
+
+## *对输入的字符串进行词频统计*
 
 ```asm
 DATAS SEGMENT
@@ -342,4 +344,181 @@ other_again:
     INT 21H
 CODES ENDS
     END START
+```
+
+
+
+## *输入十个十进制数，输出逆序的十六进制数*
+
+```asm
+;数据段
+datas SEGMENT
+    arr dw 10 dup(?)
+    inputer db 'please input ten numbers: $'
+    res db 0dh,0ah,'result is:',0dh,0ah,'$'
+datas ENDS
+
+;堆栈段
+stacks SEGMENT
+    dw 100 dup(0)
+stacks ENDS
+
+;代码段
+codes SEGMENT
+    assume cs:codes,ds:datas,ss:stacks
+;/*********************/
+;主程序
+main PROC far
+start:
+    mov ax,datas
+    mov ds,ax
+    ;此处输入代码
+    ;提示输入
+    lea dx,inputer
+    mov ah,9
+    int 21h
+
+    ;设置输入10次的循环
+    mov cx,10
+    mov si,0
+loop_input:
+    call decibin
+    mov arr[si],bx
+    mov ax,2
+    add si,ax
+    loop loop_input
+
+    ;用冒泡法进行排序
+    mov ax,0
+    call buble
+
+    ;输出提示
+    call crlf
+    lea dx,res
+    mov ah,9
+    int 21h
+
+    ;进行十个数的输出
+    mov cx,10
+    mov si,0
+loop_output:
+    mov bx,arr[si]
+    call binihex
+    call crlf
+    mov ax,2
+    add si,ax
+    loop loop_output
+
+    mov ah,4ch
+    int 21h
+main ENDP
+
+;/**********************/
+;子程序功能：采用冒泡法实现逆序排序
+;入口参数：所有的数是在arr中存储的
+;返回值：void
+buble PROC
+
+    mov ax,datas
+    mov ds,ax
+
+    mov cx,10
+    dec cx
+loop1:
+    mov di,cx
+    mov bx,0
+loop2:
+    mov ax,arr[bx]
+    cmp ax,arr[bx+2]
+    jge continue
+    xchg ax,arr[bx+2]
+    mov arr[bx],ax
+continue:
+    add bx,2
+    loop loop2
+
+    mov cx,di
+
+    loop loop1
+
+    ret
+buble ENDP
+
+;/******************************/
+;子程序功能：输入十进制转化为内存中的数据
+;入口参数：none
+;返回值：输入的数字数据会储存在bx中，循环cx弹出
+decibin PROC near
+    push cx
+    mov bx,0
+
+newchar:
+    mov ah,1
+    int 21h
+    sub al,30h
+    jl exit     ;只要输入非数字字符就退出
+    cmp al,9d
+    jg exit
+    cbw
+    ;现在数字就在ax中
+    xchg ax,bx
+    mov cx,10d
+    mul cx  ;乘十操作
+    xchg ax,bx
+    add bx,ax
+    jmp newchar
+
+exit:
+    pop cx
+    ret
+decibin ENDP
+;/************************/
+
+;/************************/
+;子程序功能：内存中的数据以十六进制输出
+;入口参数：输出的数据会储存在bx中
+;返回值：void
+binihex PROC near
+    push cx
+    mov ch,4
+
+rotate:
+    mov cl,4
+    rol bx,cl
+    mov al,bl
+    and al,0fh
+    add al,30h
+    cmp al,3ah
+    jl printit
+    add al,7h
+
+printit:
+    mov dl,al
+    mov ah,2
+    int 21h
+    dec ch
+    jnz rotate
+
+    pop cx
+    ret
+binihex ENDP
+;/*********************/
+
+;/**********************/
+;子程序功能：简单的换行功能
+crlf PROC near
+    mov dl,0dh
+    mov ah,2
+    int 21h
+
+    mov dl,0ah
+    mov ah,2
+    int 21h
+
+    ret
+crlf ENDP
+;/*******************/
+
+codes ENDS
+    end start
 ```
