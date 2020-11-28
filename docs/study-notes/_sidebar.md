@@ -1,6 +1,7 @@
 * [此页说明](./)
 * [python学习](python/)
 * [canvas学习](canvas/)
+* [JavaScript](jscript/)
 * [Linux笔记](linux/)
 * [Odoo学习](odoo/)
 * [Scss学习](scss/)
