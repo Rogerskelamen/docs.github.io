@@ -1,4 +1,4 @@
-* [此页说明](/study-notes/asm/)
-* [汇编入门](/study-notes/asm/example)
-* [常用指令](/study-notes/asm/instruction)
-* [上一级](/study-notes/)
+* [此页说明](./)
+* [汇编入门](example)
+* [常用指令](instruction)
+* [上一级](../)
