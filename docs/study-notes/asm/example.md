@@ -160,8 +160,6 @@ CODES ENDS
 
 
 
-
-
 ## *对输入的字符串进行词频统计*
 
 ```asm
@@ -518,6 +516,330 @@ crlf PROC near
     ret
 crlf ENDP
 ;/*******************/
+
+codes ENDS
+    end start
+```
+
+## 移除‘*’
+
+```asm
+;数据段
+datas SEGMENT
+    inputer db 'Please input the string: $'
+    arr db 81,0,81 dup(?)
+    res db 'the result:',0ah,0dh,'$'
+    ui db '/*************************************/',0ah,0dh
+       db 'Please choose one option to operate the string',0ah,0dh
+       db '1. Remove the ahead *',0ah,0dh
+       db '2. Remove the * in tail',0ah,0dh
+       db '3. Remove the * in middle',0ah,0dh
+       db '4. Remove all the *',0ah,0dh
+       db '5. Quit the program',0ah,0dh
+       db '/**************************************/',0ah,0dh
+       db 'Please input your choice: $'
+    quiting db 'Exiting$'
+    quited db 'Exited!$'
+datas ENDS
+
+;堆栈段
+stacks SEGMENT
+    db 100 dup(0)
+stacks ENDS
+
+;代码段
+codes SEGMENT
+    assume cs:codes,ds:datas,ss:stacks
+
+start:
+;主程序
+main PROC far
+    mov ax,datas
+    mov ds,ax
+
+    ;进行提示输出
+    lea dx,inputer
+    mov ah,9
+    int 21h
+
+    lea dx,arr
+    mov ah,10
+    int 21h
+    
+showui:
+    call crlf
+    call crlf
+    call callui
+
+    mov ah,1
+    int 21h
+    mov bl,al
+
+    call crlf
+    call crlf
+
+    mov al,bl
+    cmp al,31h
+    jz choice1
+    cmp al,32h
+    jz choice2
+    cmp al,33h
+    jz choice3
+    cmp al,34h
+    jz choice4
+    cmp al,35h
+    jz choice5
+
+choice1:
+    lea dx,res
+    mov ah,9
+    int 21h
+    call choose1
+    jmp showui
+choice2:
+    lea dx,res
+    mov ah,9
+    int 21h
+    call choose2
+    jmp showui
+choice3:
+    lea dx,res
+    mov ah,9
+    int 21h
+    call choose3
+    jmp showui
+choice4:
+    lea dx,res
+    mov ah,9
+    int 21h
+    call choose4
+    jmp showui
+choice5:
+    call quitdelay
+    ;在quit子程序调用后，直接跳出循环
+    call crlf
+
+    ;中断指令，程序结束
+    MOV AH,4CH
+    INT 21H
+main ENDP
+
+;/****************************/
+;子程序功能：实现缓慢退出效果
+quitdelay PROC
+    push cx
+    push bx
+    push si
+
+    mov bx,5
+
+    lea dx,quiting
+    mov ah,9
+    int 21h
+
+inputagain:
+    mov cx,1000h    ;使外层循环1000h次
+lpagain:
+    mov si,cx
+    mov cx,2000h    ;内层循环2000h次
+lpquit:
+    loop lpquit
+
+    mov cx,si
+    loop lpagain
+
+    mov dl,'.'
+    mov ah,2
+    int 21h
+
+    dec bx
+    cmp bx,0
+    jnz inputagain
+
+    call crlf
+    lea dx,quited
+    mov ah,9
+    int 21h
+
+    pop si
+    pop bx
+    pop cx
+    ret
+quitdelay ENDP
+
+; /**************************/
+;子程序功能：实现删除中间的*
+; 先是将除了前面星号外的星号全部删除，然后补上后面的星号
+choose3 PROC near
+    push cx
+    push bx
+    push si
+    push di
+
+    ;首先初始化一波
+    mov ax,0
+    mov bx,0
+    mov cx,0
+
+again3:
+    mov dl,arr[bx+2]
+    mov ah,02h
+    int 21h
+    cmp arr[bx+2],'*'
+    jnz delall
+    inc bx
+    jmp again3
+
+delall:
+    inc bx
+    cmp arr[bx+2],'*'
+    jz delall
+    cmp arr[bx+2],20h
+    jl nextadd
+    mov dl,arr[bx+2]
+    mov ah,02h
+    int 21h
+    jmp delall
+
+nextadd:
+    mov bx,0
+    lea si,arr
+    mov bl,[si+1]
+    dec bl
+
+circle:
+    cmp arr[bx+2],'*'
+    jnz exit3
+    mov dl,'*'
+    mov ah,02h
+    int 21h
+    dec bx
+    jmp circle 
+
+exit3:
+    pop di
+    pop si
+    pop bx
+    pop cx
+    ret
+choose3 ENDP
+
+;/*************************/
+;子程序功能：实现删除后面的*
+choose2 PROC near
+    push ax
+    push cx
+    push bx
+    push si
+
+    mov bx,0
+    lea si,arr
+    mov bl,[si+1]               ;这里将字符个数给si
+    dec bl
+
+again2:
+
+    cmp arr[bx+2],'*'
+    jnz count
+    dec bx
+    jmp again2
+
+count:
+    mov cx,bx
+    inc cx
+    mov bx,0
+
+lp2:
+    mov dl,arr[bx+2]
+    mov ah,02h
+    int 21h
+    inc bx
+
+    loop lp2
+
+    pop si
+    pop bx
+    pop cx
+    pop ax
+    ret
+choose2 ENDP
+
+;/*************************/
+;子程序功能：实现删除前面的*
+choose1 PROC near
+    push si
+    mov si,2
+    dec si
+
+again1:
+    inc si
+    cmp arr[si],'*'
+    jz again1
+
+lp:
+    cmp arr[si],20h
+    jl exit1
+    mov dl,arr[si]
+    mov ah,2
+    int 21h
+
+    inc si
+    jmp lp
+
+exit1:
+    pop si
+    ret
+choose1 ENDP
+
+; /********************/
+;子程序功能：删除所有的*
+choose4 PROC near
+    push si
+    mov si,2
+    dec si
+
+again4:
+    inc si
+    cmp arr[si],'*'
+    jz again4
+    cmp arr[si],20h
+    jl exit4
+
+    mov dl,arr[si]
+    mov ah,2
+    int 21h
+    jmp again4
+exit4:
+    pop si
+    ret
+choose4 ENDP
+
+; /***********************/
+;子程序功能：显示用户界面
+;程序返回值：通过ax来返回一个用户选项
+callui proc near
+    lea dx,ui
+    mov ah,9
+    int 21h
+callui endp
+
+; /************************/
+;子程序功能：简单的换行功能
+crlf proc near
+    push ax
+
+    mov dl,0dh
+    mov ah,2
+    int 21h
+
+    mov dl,0ah
+    mov ah,2
+    int 21h
+
+    pop ax
+    ret
+crlf endp
+; /**********************/
 
 codes ENDS
     end start
