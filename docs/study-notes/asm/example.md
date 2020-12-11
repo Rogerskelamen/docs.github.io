@@ -844,3 +844,117 @@ crlf endp
 codes ENDS
     end start
 ```
+
+## 乐曲播放（JOJO）
+
+```asm
+STACK SEGMENT    
+    db 64 dup(0)
+STACK ENDS
+
+dseg SEGMENT para 'data'
+    ;此处输入数据段代码  
+mus_freq dw 175
+         dw 311,262,208,175
+         dw 311,262,208,175
+         dw 311,262,208,175
+         dw 294,311,330,349
+         dw 311,262,208,175
+         dw 311,262,208,175
+         dw 311,262,208,175
+         dw 294,311,330,349
+
+         dw 262,311,330,349
+         dw 262,311,330,349
+         dw 262,311,330,349
+         dw 311,349,370,349
+         dw 262,311,330,349
+         dw 262,311,330,349
+         dw 262,311,330,349
+         dw 311,349,370
+
+         dw 175
+         dw 208,262,349,392
+         dw 415,466,494,523
+         dw 494,415,349
+         dw 262,523,494,415,349,262
+         dw 415,311,294,-1
+
+mus_time dw 30
+         dw 8 dup(25,10,25,30)
+         dw 7 dup(30,15,30,30)
+         dw 30,15,30
+         dw 160
+         dw 60,50,45,160
+         dw 30,20,15,30
+         dw 15,25,35
+         dw 15,25,30,25,20,40
+         dw 30,15,100
+
+dseg ENDS
+
+
+cseg SEGMENT para 'code'
+    ASSUME CS:cseg,DS:dseg,SS:STACK
+music proc far 
+    MOV AX,dseg
+    MOV DS,AX
+    ;此处输入代码段代码
+    lea si,mus_freq
+    lea bp,ds:mus_time
+freq:
+	mov di,[si]
+	cmp di,-1
+	je end_mus
+	mov bx,ds:[bp]
+	call soundf
+	add si,2
+	add bp,2
+	jmp freq
+end_mus:
+    MOV AH,4CH
+    INT 21H
+music endp
+
+
+
+soundf proc near
+
+       mov al,0b6h
+       out 43h,al
+       mov dx,12h
+       mov ax,348ch
+       div di
+       out 42h,al
+       mov al,ah
+       out 42h,al
+       in al,61h
+       mov ah,al
+       or al,3
+       out 61h,al
+wait1:
+       mov cx, 663*5
+       call waitf
+       dec bx
+       jne wait1
+       mov al,ah
+       out 61h,al
+       ret
+soundf endp
+;/***************************/
+waitf proc near
+       push ax
+waitf1:
+       in al,61h
+       and al,10h
+       cmp al,ah
+       je waitf1
+       mov ah,al
+
+       loop waitf1
+       pop ax 
+       ret
+waitf endp
+cseg ENDS
+    END music
+```
