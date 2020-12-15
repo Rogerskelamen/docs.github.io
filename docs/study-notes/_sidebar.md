@@ -6,4 +6,6 @@
 * [Odoo学习](odoo/)
 * [Scss学习](scss/)
 * [汇编学习](asm/)
+* [http协议](http/)
+* [uni-app](uni-app/)
 * [上一级](../)
