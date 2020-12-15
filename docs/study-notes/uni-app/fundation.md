@@ -1,7 +1,5 @@
 # uni-app的基本使用
 
-课程介绍：
-
 基础部分：
 
 + 环境搭建
@@ -48,8 +46,7 @@ HBuilderX是通用的前端开发工具，但为`uni-app`做了特别强化。
 
 + 选择uni-app,填写项目名称，项目创建的目录
 
-  ![](./images/create.jpg)
-
+![](https://gitee.com/rogerskelamen/mdpic/raw/master/img/create111.jpg)
 
 ## 运行项目
 
@@ -302,7 +299,7 @@ uni-app中的组件，就像 `HTML` 中的 `div` 、`p`、`span` 等标签的作
 
 ### 001 - 组件的属性
 
-![](./images/2view.png)
+![](https://gitee.com/rogerskelamen/mdpic/raw/master/img/2view.png)
 
 ### 002 - 代码案例
 
@@ -340,9 +337,7 @@ uni-app中的组件，就像 `HTML` 中的 `div` 、`p`、`span` 等标签的作
 
 ## image组件的使用
 
-### [image](https://uniapp.dcloud.io/component/image?id=image)
-
-图片。
+[image文档地址。](https://uniapp.dcloud.io/component/image?id=image)
 
 | 属性名 | 类型   | 默认值        | 说明                 | 平台差异说明 |
 | ------ | ------ | ------------- | -------------------- | ------------ |
@@ -687,7 +682,7 @@ uni.stopPullDownRefresh()
 
 通过onReachBottom监听到触底的行为
 
-```js
+```html
 <template>
 	<view>
 		<button type="primary" @click="startPull">开启下拉刷新</button>
@@ -726,7 +721,7 @@ uni.stopPullDownRefresh()
 
 **发送get请求**
 
-```js
+```html
 <template>
 	<view>
 		<button @click="sendGet">发送请求</button>
@@ -760,7 +755,7 @@ uni.stopPullDownRefresh()
 
 代码演示
 
-```js
+```html
 <template>
 	<view>
 		<button type="primary" @click="setStor">存储数据</button>
@@ -793,7 +788,7 @@ uni.stopPullDownRefresh()
 
 代码演示
 
-```js
+```html
 <template>
 	<view>
 		<button type="primary" @click="setStor">存储数据</button>
@@ -1169,8 +1164,6 @@ goAbout () {
 	}
 </script>
 ```
-
-# 
 
 # uni-app中组件的创建
 
