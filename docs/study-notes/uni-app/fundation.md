@@ -15,8 +15,6 @@
 + 组件创建和通讯，及组件的生命周期
 + uni-app中使用uni-ui库
 
-项目：黑马商城项目
-
 ## uni-app介绍 
 [官方网页](https://uniapp.dcloud.io/resource)
 
