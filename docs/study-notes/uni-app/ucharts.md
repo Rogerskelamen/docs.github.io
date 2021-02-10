@@ -1,5 +1,7 @@
 # 初试uCharts
 
+> 相比于eCharts，[uCharts](http://doc.ucharts.cn/1073940)虽然没有那么大的生态圈，但毕竟是专门为uni-app开发的插件，其效果和功能或许更为合适
+
 直接上vue单页面代码（需提前导入[ucharts](https://ext.dcloud.net.cn/plugin?id=271)）：
 
 ```vue
@@ -89,6 +91,77 @@ extra: {
     line: {
         type: 'curve',
     }
+}
+```
+
+## 几个必填项（required）
+
+- `canvasId`
+
+  用于填写图表的id，比如这里：
+
+  ```html
+  		<canvas canvas-id="canvasColumn" id="canvasColumn" class="charts"></canvas>
+  <!-- id就是canvasColumn -->
+  ```
+
+- `$this`
+
+  填入this的vue示例
+
+- `type`
+
+  这是啥图
+
+- `categories`
+
+  数据类别
+
+- `series`
+
+  数据
+
+
+
+看个高级的示例：
+
+```js
+showColumn(canvasId,chartData){
+    canvasColumn = new uCharts({
+        $this: _self,		// 必选值: 传入this实例
+        canvasId: canvasId,		// 这里是图表的id
+        type: 'area',		// 采用区域图，link：http://doc.ucharts.cn/1172251
+        legend: {		// 图例的各种设置（就是图下方的说明文字）
+            show: true,		// 可单独用legend:true,效果与单独使用这条代码相同						
+        },
+        colors: ['#FF6600', '#3360DB', '#00FFCC'],	// 图标配色方案
+        fontSize:11,		// 字体大小
+        background:'#FFFFFF',	
+        pixelRatio:_self.pixelRatio,	// 像素比，默认为1
+        animation: true,	// 开启开场动画
+        dataPointShape:false,	// 数据点的样式
+
+        categories: chartData.categories,	// 数据类别，实际上算是数据的对应名称分类
+        series: chartData.series,	// 数据列表
+        xAxis: {
+            disableGrid: true,	// 关闭x轴网格
+            boundaryGap: 'center',
+            axisLine: false		// 坐标轴轴线是否显示
+        },
+        yAxis: {
+            disabled: true,		// 直接关闭Y轴
+        },
+        dataLabel: false,	// 是否在图表中显示数据内容值
+        width: _self.cWidth * _self.pixelRatio,
+        height: _self.cHeight * _self.pixelRatio,
+        extra: {
+            area: {
+                type: "curve",
+                opacity: 1,		//	区域图透明度
+                gradient: true		// 开启区域图渐变色
+            }
+        }
+    });
 }
 ```
 
