@@ -14,6 +14,7 @@
 <script>
 	import uCharts from '@/components/u-charts/u-charts.js';
 	var _self;
+    var canvaColumn = null;
 	export default {
 		data() {
 			return {
@@ -41,7 +42,7 @@
 		},
 		methods: {
 			showColumn(canvasId,chartData){
-				canvasColumn = new uCharts({
+				canvaColumn = new uCharts({
 					$this: _self,		// 必选值: 传入this实例
 					canvasId: canvasId,		// 这里是图表的id
 					type: 'column',		// 这里是类型
@@ -121,9 +122,39 @@ extra: {
 
   数据
 
+### 还有几个容易报错的配置
 
+- `_self`
 
-看个高级的示例：
+  因为**`$this`指向问题，官方推荐var一个`_self`来表示vue示例对象**（*然后在`onLoad`中赋值即可*）
+
+  eg：
+
+  ```js
+  import uCharts from '../../components/u-charts/u-charts.js';
+  var _self;
+  onLoad() {
+  	_self = this;
+      this.getServerData();
+  }
+  ```
+
+- `canvaColumn`
+
+  这里要是没有var一个的话，**很有可能会出现类似`... is not defined`这样的报错**（*当然不一定是Column，还有可能是其他类型的图*）
+
+  eg：
+
+  ```js
+  var canvaColumn=null;
+  ...
+  showColumn(canvasId,chartData){
+  	canvaColumn=new uCharts({
+        	...
+      });
+  ```
+
+### 看个高级的示例：
 
 ```js
 showColumn(canvasId,chartData){
