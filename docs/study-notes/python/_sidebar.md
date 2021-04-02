@@ -4,4 +4,5 @@
 * [python语法(三)](python_3)
 * [python装饰器](deco)
 * [爬虫初体验](spider)
+* [matplotlib笔记](matplot)
 * [上一级](../)
